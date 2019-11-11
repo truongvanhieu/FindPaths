@@ -14,7 +14,7 @@ namespace FindAllPaths
 {
     public class GraphBusStop
     {
-
+        public static int NumRoute = 1;//Số lần chuyển tuyến
         // No. of vertices in graph  
         private int numberVertices;
         List<string> listVertices = new List<string>();//750 tram-thông tin đỉnh trạm
@@ -61,12 +61,14 @@ namespace FindAllPaths
                 }
             }
 
+
             //------------------------------------------------------
             // arbitrary source  
-            string s = "5c3ebc1d-3c6a-4d6f-ace9-c9d990b0f473";
+            string s = "2f41a813-94ad-4f3e-b557-88cbe1768c40";
 
             // arbitrary destination  
-            string d = "62a113d0-19c8-4269-a397-921837acff5a";
+            string d = "834a8e8e-33e9-42ff-b424-163febe6ed5b";
+
             DateTime t = DateTime.Now;
             Console.WriteLine("Following are all different" + " paths from " + s + " to " + d);
             printAllPaths(s, d);
@@ -173,7 +175,7 @@ namespace FindAllPaths
 
                         //check thỏa 3 điều kiện lưu vào:
 
-                        if (localPathListRouteID.Count() <= 2) // Điều kiện 1 (số lần chuyển tuyến <= 3 lần) số lần chuyển tuyến chỉ nhỏ hơn hoặc bằng 2
+                        if (localPathListRouteID.Count() <= GraphBusStop.NumRoute) // Điều kiện 1 (số lần chuyển tuyến <= 3 lần) số lần chuyển tuyến chỉ nhỏ hơn hoặc bằng 2
                         {
                             if (i.RouteId != localPathListRouteID.ElementAt(localPathListRouteID.Count() - 1)) // Điều kiện 3: Tuyến mới sẽ đi chưa có trong danh sách tuyến hiện tại - tuyến mới khác # với tuyến hiện tại
                             {
