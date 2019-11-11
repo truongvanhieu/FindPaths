@@ -54,15 +54,15 @@ namespace FindAllPaths
             }
         }
 
-        // add edge from u to v  
-        public void addEdge(int u, int v)
+        // add edge from u to v  --> u: busstop, v:bustop next
+        public void addEdge(string u, string v)
         {
             // Add v to u's list.  
             //adjacencyList[u].Add(v);
-            adjacencyList[u.ToString()].Add(v.ToString());
+            adjacencyList[u].Add(v);
         }
 
-        // Prints all paths from  
+        // Prints all paths from  po
         // 's' to 'd'  
         public void printAllPaths(string s, string d)
         {
@@ -133,12 +133,12 @@ namespace FindAllPaths
         {
             // Create a sample graph  
             GraphBusStop g = new GraphBusStop(4);
-            g.addEdge(0, 1);
-            g.addEdge(0, 2);
-            g.addEdge(0, 3);
-            g.addEdge(2, 0);
-            g.addEdge(2, 1);
-            g.addEdge(1, 3);
+            g.addEdge("0", "1");//add canh
+            g.addEdge("0", "2");
+            g.addEdge("0", "3");
+            g.addEdge("2", "0");
+            g.addEdge("2", "1");
+            g.addEdge("1", "3");
 
             // arbitrary source  
             string s = "2";
