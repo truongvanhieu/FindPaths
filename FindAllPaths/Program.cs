@@ -173,9 +173,9 @@ namespace FindAllPaths
 
                         //check thỏa 3 điều kiện lưu vào:
 
-                        if (localPathListRouteID.Count() <= 2) // số lần chuyển tuyến chỉ nhỏ hơn hoặc bằng 2
+                        if (localPathListRouteID.Count() <= 2) // Điều kiện 1 (số lần chuyển tuyến <= 3 lần) số lần chuyển tuyến chỉ nhỏ hơn hoặc bằng 2
                         {
-                            if (i.RouteId != localPathListRouteID.ElementAt(localPathListRouteID.Count() - 1)) // tuyến mới khác # với tuyến hiện tại
+                            if (i.RouteId != localPathListRouteID.ElementAt(localPathListRouteID.Count() - 1)) // Điều kiện 3: Tuyến mới sẽ đi chưa có trong danh sách tuyến hiện tại - tuyến mới khác # với tuyến hiện tại
                             {
                                 if (!localPathListRouteID.Contains(i.RouteId))  // tuyến mới không có trong danh sách tuyến đã đi
                                 {
@@ -239,7 +239,7 @@ namespace FindAllPaths
                                 {
                                     //Đang cùng tuyến: get chiều của cạnh cuối cùng, so sánh với chiều của cạnh chuẩn bị thêm vào:
                                     //Nếu cùng chiều thì thêm vào ok
-                                    if(localpathList_Ok.ElementAt(localpathList_Ok.Count() - 2).IsOutWard  == i.IsOutWard)
+                                    if(localpathList_Ok.ElementAt(localpathList_Ok.Count() - 2).IsOutWard  == i.IsOutWard) //Điều kiện 2: Nếu cạnh sẽ đi CÙNG chiều với CHIỀU cạnh trước đó
                                     {
                                         localPathList.Add(i.NextBusStopId);//khi add điểm đi tiếp theo vào đường đi KHÔNG ĐƯỢC thỏa 3 điều kiện trên:
                                 
