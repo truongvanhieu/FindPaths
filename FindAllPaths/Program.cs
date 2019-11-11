@@ -92,9 +92,9 @@ namespace FindAllPaths
             // Mark the current node  
             isVisited[u] = true;
 
-            if (u.Equals(d))
+            if (u.Equals(d))//Đã tới đích
             {
-                Console.WriteLine(string.Join("-->", localPathList));
+                Console.WriteLine(string.Join("-->", localPathList));//in đường đi
 
                 // if match found then no need  
                 // to traverse more till depth  
@@ -106,11 +106,11 @@ namespace FindAllPaths
             // adjacent to current vertex  
             foreach (string i in adjacencyList[u])
             {
-                if (!isVisited[i])
+                if (!isVisited[i])//điều kiện đi tiếp
                 {
                     // store current node  
                     // in path[]  
-                    localPathList.Add(i);
+                    localPathList.Add(i);//khi add điểm đi tiếp theo vào đường đi KHÔNG ĐƯỢC thỏa 3 điều kiện trên:
                     printAllPathsUtil(i, d, isVisited, localPathList);
 
                     // remove current node  
@@ -133,6 +133,9 @@ namespace FindAllPaths
         {
             // Create a sample graph  
             GraphBusStop g = new GraphBusStop(4);
+            
+            //--> mo ta g.addEdge("BusStop", "BusStopNext");//add canh tung canh vao tong: 1187 canh
+
             g.addEdge("0", "1");//add canh
             g.addEdge("0", "2");
             g.addEdge("0", "3");
