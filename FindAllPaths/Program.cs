@@ -11,35 +11,46 @@ using System.Threading.Tasks;
 
 namespace FindAllPaths
 {
-    public class Graph
+    public class GraphBusStop
     {
 
         // No. of vertices in graph  
-        private int v;
+        private int numberVertices;
+        List<string> listVertices = new List<string>();//750 tram
 
         // adjacency list  
-        private List<int>[] adjList;
+        private Dictionary<string, List<string>> adjacencyList = new Dictionary<string, List<string>>();
 
-        // Constructor  
-        public Graph(int vertices)
+        private void initListVertices(int numberVertices)
         {
-
+    
+            for (int i = 0; i < numberVertices; i++)
+            {
+                this.listVertices.Add(i.ToString());//change i thanh busstop id
+            }
+        }
+        // Constructor  
+        public GraphBusStop(int NumVertices)
+        {
             // initialise vertex count  
-            this.v = vertices;
+            this.numberVertices = NumVertices;
+            initListVertices(this.numberVertices);
 
             // initialise adjacency list  
-            initAdjList();
+            initAdjacencyList();
         }
 
         // utility method to initialise  
         // adjacency list  
-        private void initAdjList()
+        private void initAdjacencyList()
         {
-            adjList = new List<int>[v];
+            //adjacencyList = new Dictionary<string, List<string>>();
 
-            for (int i = 0; i < v; i++)
+            foreach(string vertices in this.listVertices)
             {
-                adjList[i] = new List<int>();
+                List<string> listvaule = new List<string>();//de luu danh sach cac dinh ke
+
+                adjacencyList.Add(vertices, listvaule);
             }
         }
 
@@ -47,15 +58,21 @@ namespace FindAllPaths
         public void addEdge(int u, int v)
         {
             // Add v to u's list.  
-            adjList[u].Add(v);
+            //adjacencyList[u].Add(v);
+            adjacencyList[u.ToString()].Add(v.ToString());
         }
 
         // Prints all paths from  
         // 's' to 'd'  
-        public void printAllPaths(int s, int d)
+        public void printAllPaths(string s, string d)
         {
-            bool[] isVisited = new bool[v];
-            List<int> pathList = new List<int>();
+            Dictionary<string, bool> isVisited = new Dictionary<string, bool>();
+            foreach (string vertices in this.listVertices)
+            {
+                isVisited.Add(vertices, false);
+            }
+
+            List<string> pathList = new List<string>();
 
             // add source to path[]  
             pathList.Add(s);
@@ -70,7 +87,7 @@ namespace FindAllPaths
         // vertices in current path.  
         // localPathList<> stores actual  
         // vertices in the current path  
-        private void printAllPathsUtil(int u, int d, bool[] isVisited, List<int> localPathList)
+        private void printAllPathsUtil(string u, string d, Dictionary<string, bool> isVisited, List<string> localPathList)
         {
             // Mark the current node  
             isVisited[u] = true;
@@ -87,7 +104,7 @@ namespace FindAllPaths
 
             // Recur for all the vertices  
             // adjacent to current vertex  
-            foreach (int i in adjList[u])
+            foreach (string i in adjacencyList[u])
             {
                 if (!isVisited[i])
                 {
@@ -114,10 +131,8 @@ namespace FindAllPaths
         // Driver code  
         public static void Main(String[] args)
         {
-            List<string> l = new List<string> { "1", "2", "3", "4" };
-            Console.WriteLine(string.Join("-->", l));
             // Create a sample graph  
-            Graph g = new Graph(4);
+            GraphBusStop g = new GraphBusStop(4);
             g.addEdge(0, 1);
             g.addEdge(0, 2);
             g.addEdge(0, 3);
@@ -126,10 +141,10 @@ namespace FindAllPaths
             g.addEdge(1, 3);
 
             // arbitrary source  
-            int s = 2;
+            string s = "2";
 
             // arbitrary destination  
-            int d = 3;
+            string d = "3";
 
             Console.WriteLine("Following are all different" + " paths from " + s + " to " + d);
             g.printAllPaths(s, d);
