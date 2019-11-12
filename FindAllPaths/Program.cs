@@ -14,7 +14,7 @@ namespace FindAllPaths
 {
     public class GraphBusStop
     {
-        public static int NumRoute = 1;//Số lần chuyển tuyến
+        public static int NUMBER_ROUTE = 2;//Số lần chuyển tuyến
         // No. of vertices in graph  
         private int numberVertices;
         List<string> listVertices = new List<string>();//750 tram-thông tin đỉnh trạm
@@ -67,7 +67,7 @@ namespace FindAllPaths
             string s = "2f41a813-94ad-4f3e-b557-88cbe1768c40";
 
             // arbitrary destination  
-            string d = "834a8e8e-33e9-42ff-b424-163febe6ed5b";
+            string d = "16dbe27c-8baa-48e8-908a-569469ae8319";
 
             DateTime t = DateTime.Now;
             Console.WriteLine("Following are all different" + " paths from " + s + " to " + d);
@@ -111,20 +111,20 @@ namespace FindAllPaths
 
             List<string> pathList = new List<string>();
             List<string> pathListRouteID = new List<string>();
-            
+
             List<BusStopModel> pathList_Ok = new List<BusStopModel>();
 
             // add source to path[]  
             pathList.Add(s);//Lưu đỉnh xuất phát s vào mảng đường đi qua các đỉnh
-            BusStopModel bstopstopStart = new BusStopModel()
-            {
-                BusStopId = s
-            };
+            //BusStopModel bstopstopStart = new BusStopModel()
+            //{
+            //    BusStopId = s
+            //};
 
-            pathList_Ok.Add(bstopstopStart);
-            
+            //pathList_Ok.Add(bstopstopStart);
+
             // Call recursive utility  
-            printAllPathsUtil(s, d, isVisited, pathList, pathListRouteID, pathList_Ok);
+            printAllPathsUtil(s, d, isVisited, pathList_Ok);
         }
 
         // A recursive function to print  
@@ -133,20 +133,23 @@ namespace FindAllPaths
         // vertices in current path.  
         // localPathList<> stores actual  
         // vertices in the current path  
-        private void printAllPathsUtil(string u, string d, Dictionary<string, bool> isVisited, List<string> localPathList, List<string> localPathListRouteID, List<BusStopModel> localpathList_Ok)
+        private void printAllPathsUtil(string u, string d, Dictionary<string, bool> isVisited, List<BusStopModel> localpathList_Ok)
         {
             // Mark the current node  
             isVisited[u] = true;
 
             if (u.Equals(d))//Đã tới đích
             {
-                Console.WriteLine(string.Join("-->", localPathListRouteID));
-                Console.WriteLine("/n Tong BStop: " + localPathList.Count());
-                Console.WriteLine(string.Join("-->", localPathList));//in đường đi
-
+                var listRoutedId = localpathList_Ok.Select(x => x.RouteId).Distinct();
+                Console.Write("Tong tuyen: ");
+                Console.WriteLine(string.Join("-->", listRoutedId));
+                Console.Write("\n");
+                Console.Write("DS Tram: ");
+                Console.WriteLine(string.Join("-->", localpathList_Ok.Select(x => x.BusStopId)));
+                Console.Write("\n");
+                Console.Write("Tong BsStop: ");
+                Console.WriteLine(localpathList_Ok.Count());
                 Console.WriteLine("-------------------------------- \n");
-
-                Console.WriteLine(string.Join("/n Tong BStop", localpathList_Ok.Count()));
                 var dem = 0;
 
                 // if match found then no need  
@@ -155,126 +158,128 @@ namespace FindAllPaths
                 return;
             }
 
-            // Recur for all the vertices  
-            // adjacent to current vertex  
+            // Recur for all the vertices adjacent to current vertex  
             foreach (BusStopModel i in adjacencyList[u])//danh sách busstop next (các đỉnh kề)
             {
-                if (!string.IsNullOrEmpty(i.NextBusStopId))
+                if (!string.IsNullOrEmpty(i.NextBusStopId))//không có trạm kề
                 {
                     if (!isVisited[i.NextBusStopId])//điều kiện đi tiếp
                     {
                         // store current node  
                         // in path[]  
                         //kiểm tra điều kiện đưa điểm kề vào (busstop next vào danh sách đường đi)- cạnh u [i]
-                        var route = i.RouteId;
+                        var routIdNext = i.RouteId;
 
-                        if (localPathListRouteID.Count() == 0)
-                        {
-                            localPathListRouteID.Add(route);
-                        }
+                        var listRoutedId = localpathList_Ok.Where(x => !string.IsNullOrEmpty(x.RouteId)).Select(x => x.RouteId).Distinct();
 
                         //check thỏa 3 điều kiện lưu vào:
-
-                        if (localPathListRouteID.Count() <= GraphBusStop.NumRoute) // Điều kiện 1 (số lần chuyển tuyến <= 3 lần) số lần chuyển tuyến chỉ nhỏ hơn hoặc bằng 2
+                        if (localpathList_Ok.Count() == 0)
                         {
-                            if (i.RouteId != localPathListRouteID.ElementAt(localPathListRouteID.Count() - 1)) // Điều kiện 3: Tuyến mới sẽ đi chưa có trong danh sách tuyến hiện tại - tuyến mới khác # với tuyến hiện tại
+                            // add đỉnh đi qua
+                            BusStopModel bstopstopNext = new BusStopModel()
                             {
-                                if (!localPathListRouteID.Contains(i.RouteId))  // tuyến mới không có trong danh sách tuyến đã đi
+                                BusStopId = i.BusStopId,
+                                NextBusStopId = i.NextBusStopId,
+                                IsOutWard = i.IsOutWard,
+                                RouteId = i.RouteId,
+                                DecodeString = i.DecodeString,
+                                Distance = i.Distance
+                            };
+
+                            localpathList_Ok.Add(bstopstopNext);
+
+                            printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList_Ok);
+
+                            // remove current node  
+                            localpathList_Ok.RemoveAt(localpathList_Ok.Count() - 1);
+                        }
+                        else 
+                        {
+                            if (listRoutedId.Count() <= GraphBusStop.NUMBER_ROUTE) // Điều kiện 1 (số lần chuyển tuyến <= 3 lần) số lần chuyển tuyến chỉ nhỏ hơn hoặc bằng 2
+                            {
+                                if (i.RouteId != localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).RouteId) // Điều kiện 3: Tuyến mới sẽ đi chưa có trong danh sách tuyến hiện tại - tuyến mới khác # với tuyến hiện tại
                                 {
-                                    localPathListRouteID.Add(route);
-                                    //-ui get route
-                                    localPathList.Add(i.NextBusStopId);//ADD đỉnh đi tiếp vào NÈ - khi add điểm đi tiếp theo vào đường đi KHÔNG ĐƯỢC thỏa 3 điều kiện trên:
-
-                                    // add đỉnh đi qua
-                                    localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).NextBusStopId = i.NextBusStopId;
-                                    localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).IsOutWard = i.IsOutWard;
-                                    localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).RouteId = i.RouteId;
-                                    localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).DecodeString = i.DecodeString;
-                                    localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).Distance = i.Distance;
-
-                                    BusStopModel bstopstopStart = new BusStopModel()
+                                    if (!listRoutedId.Contains(i.RouteId))  // tuyến mới không có trong danh sách tuyến đã đi
                                     {
-                                        BusStopId = i.NextBusStopId
-                                    };
-
-                                    localpathList_Ok.Add(bstopstopStart);
-
-                                    printAllPathsUtil(i.NextBusStopId, d, isVisited, localPathList, localPathListRouteID, localpathList_Ok);
- 
-                                    // remove current node  
-                                    // in path[]  
-                                    localPathList.Remove(i.NextBusStopId);
-                                    localPathListRouteID.Remove(i.RouteId);
-                                    localpathList_Ok.RemoveAt(localpathList_Ok.Count() -1);
-                                }
-                            }
-                            else//đi cùng tuyến
-                            {
-                                //-ui get route
-                                //Kiểm tra đi cùng tuyến thì ko được đổi chiều đi?
-                                if(localpathList_Ok.Count() <= 1)
-                                {
-                                    localPathList.Add(i.NextBusStopId);//khi add điểm đi tiếp theo vào đường đi KHÔNG ĐƯỢC thỏa 3 điều kiện trên:
-                                
                                         // add đỉnh đi qua
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).NextBusStopId = i.NextBusStopId;
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).IsOutWard = i.IsOutWard;
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).RouteId = i.RouteId;
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).DecodeString = i.DecodeString;
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).Distance = i.Distance;
-
                                         BusStopModel bstopstopNext = new BusStopModel()
                                         {
-                                            BusStopId = i.NextBusStopId
+                                            BusStopId = i.BusStopId,
+                                            NextBusStopId = i.NextBusStopId,
+                                            IsOutWard = i.IsOutWard,
+                                            RouteId = i.RouteId,
+                                            DecodeString = i.DecodeString,
+                                            Distance = i.Distance
                                         };
 
                                         localpathList_Ok.Add(bstopstopNext);
 
-                                        printAllPathsUtil(i.NextBusStopId, d, isVisited, localPathList, localPathListRouteID, localpathList_Ok);
+                                        printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList_Ok);
 
                                         // remove current node  
-                                        // in path[]  
-                                        localPathList.Remove(i.NextBusStopId);
-                                        localpathList_Ok.RemoveAt(localpathList_Ok.Count() - 1);
-                                }
-                                else
-                                {
-                                    //Đang cùng tuyến: get chiều của cạnh cuối cùng, so sánh với chiều của cạnh chuẩn bị thêm vào:
-                                    //Nếu cùng chiều thì thêm vào ok
-                                    if(localpathList_Ok.ElementAt(localpathList_Ok.Count() - 2).IsOutWard  == i.IsOutWard) //Điều kiện 2: Nếu cạnh sẽ đi CÙNG chiều với CHIỀU cạnh trước đó
-                                    {
-                                        localPathList.Add(i.NextBusStopId);//khi add điểm đi tiếp theo vào đường đi KHÔNG ĐƯỢC thỏa 3 điều kiện trên:
-                                
-                                        // add đỉnh đi qua
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).NextBusStopId = i.NextBusStopId;
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).IsOutWard = i.IsOutWard;
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).RouteId = i.RouteId;
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).DecodeString = i.DecodeString;
-                                        localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).Distance = i.Distance;
-
-                                        BusStopModel bstopstopNext = new BusStopModel()
-                                        {
-                                            BusStopId = i.NextBusStopId
-                                        };
-
-                                        localpathList_Ok.Add(bstopstopNext);
-
-                                        printAllPathsUtil(i.NextBusStopId, d, isVisited, localPathList, localPathListRouteID, localpathList_Ok);
-
-                                        // remove current node  
-                                        // in path[]  
-                                        localPathList.Remove(i.NextBusStopId);
                                         localpathList_Ok.RemoveAt(localpathList_Ok.Count() - 1);
                                     }
-                                    //Nếu KHÁC chiều thì dừng
                                 }
+                                else//đi cùng tuyến
+                                {
+                                    //-ui get route
+                                    //Kiểm tra đi cùng tuyến thì ko được đổi chiều đi?
+                                    if (localpathList_Ok.Count() == 0)
+                                    {
+                                        // add đỉnh đi qua
+                                        BusStopModel bstopstopNext = new BusStopModel()
+                                        {
+                                            BusStopId = i.BusStopId,
+                                            NextBusStopId = i.NextBusStopId,
+                                            IsOutWard = i.IsOutWard,
+                                            RouteId = i.RouteId,
+                                            DecodeString = i.DecodeString,
+                                            Distance = i.Distance
+                                        };
 
-                                
+                                        localpathList_Ok.Add(bstopstopNext);
+
+                                        printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList_Ok);
+
+                                        // remove current node  
+                                        localpathList_Ok.RemoveAt(localpathList_Ok.Count() - 1);
+                                    }
+                                    else
+                                    {
+                                        //Đang cùng tuyến: get chiều của cạnh cuối cùng, so sánh với chiều của cạnh chuẩn bị thêm vào:
+                                        //Nếu cùng chiều thì thêm vào ok
+                                        if (localpathList_Ok.ElementAt(localpathList_Ok.Count() - 1).IsOutWard == i.IsOutWard) //Điều kiện 2: Nếu cạnh sẽ đi CÙNG chiều với CHIỀU cạnh trước đó
+                                        {
+                                            // add đỉnh đi qua
+                                            BusStopModel bstopstopNext = new BusStopModel()
+                                            {
+                                                BusStopId = i.BusStopId,
+                                                NextBusStopId = i.NextBusStopId,
+                                                IsOutWard = i.IsOutWard,
+                                                RouteId = i.RouteId,
+                                                DecodeString = i.DecodeString,
+                                                Distance = i.Distance
+                                            };
+
+                                            localpathList_Ok.Add(bstopstopNext);
+
+                                            printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList_Ok);
+
+                                            // remove current node  
+                                            localpathList_Ok.RemoveAt(localpathList_Ok.Count() - 1);
+                                        }
+                                        //Nếu KHÁC chiều thì dừng
+                                    }
+                                }
+                            }
+                            else//quá 3 tuyến thì dừng
+                            {
+                                return;//dừng
                             }
                         }
                     }
                 }
-                
+
             }
 
             // Mark the current node  

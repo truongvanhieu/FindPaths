@@ -15,4 +15,11 @@ namespace FindAllPaths
         public string DecodeString { get; set; }
         public double Distance { get; set; }
     }
+
+    public class SaveRouteData
+    {
+        public BusStopModel BusStop { get; set; }
+        public List<string> ListRouteId { get; set; }
+        public double SumDistance { get; set; }
+    }
 }
