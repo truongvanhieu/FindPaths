@@ -46,16 +46,17 @@ namespace FindAllPaths
             List<CaseRouteResultByRadius> lstcaseradius = new List<CaseRouteResultByRadius>();
             List<string> lstbusstopremove = new List<string>();
 
-            double LatOrigin = 16.074353;
-            double LngOrigin = 108.219798;
+            double LatOrigin = 15.886176;
+            double LngOrigin = 108.321097;
 
-            double LatDestination = 16.044577;
-            double LngDestination = 108.214112;
+            double LatDestination = 16.059432;
+            double LngDestination = 108.174953;
 
             //int[] lstRadius = { 500, 1000, 2000 };
             List<string> lstbusstoprogin = new List<string>();
             List<string> lstbusstopdestination = new List<string>();
-            var r = 1000;
+            var r = 100;
+            var r2 = 200;
             foreach (var item in listVertices)
             {
                 var lstbusstopnext = lstfindata.FindAll(x => x.BusStopId == item);
@@ -82,7 +83,7 @@ namespace FindAllPaths
                 }
 
                 var distancedestination = Distance(LatDestination, LngDestination, lstbusstopnext.ElementAt(0).Lat, lstbusstopnext.ElementAt(0).Lng);
-                if (distancedestination < r)
+                if (distancedestination < r2)
                 {
                     lstbusstopdestination.Add(lstbusstopnext.ElementAt(0).BusStopId);
                 }
@@ -97,7 +98,10 @@ namespace FindAllPaths
             {
                 foreach (var destination in lstbusstopdestination)
                 {
-                    printAllPaths(origin, destination);
+                    var busstoporigin = lstfindata.FindAll(x => x.BusStopId == origin).FirstOrDefault();
+                    var busstopdestination = lstfindata.FindAll(x => x.BusStopId == destination).FirstOrDefault();
+                    var ditance = Distance(busstoporigin.Lat, busstoporigin.Lng, busstopdestination.Lat, busstopdestination.Lng);
+                    printAllPaths(origin, destination, ditance);
                 }
             }
 
@@ -122,7 +126,7 @@ namespace FindAllPaths
         }
 
         // Prints all paths from  po tìm đường đi từ 's' --> to 'd'  
-        public void printAllPaths(string s, string d)
+        public void printAllPaths(string s, string d, double ditance)
         {
             Dictionary<string, bool> isVisited = new Dictionary<string, bool>();
             foreach (string vertices in this.listVertices)
@@ -138,7 +142,7 @@ namespace FindAllPaths
             pathList.Add(s);//Lưu đỉnh xuất phát s vào mảng đường đi qua các đỉnh
 
             // Call recursive utility  
-            printAllPathsUtil(s, d, isVisited, pathList_Ok);
+            printAllPathsUtil(s, d, isVisited, pathList_Ok, ditance);
         }
 
         // A recursive function to print  
@@ -147,7 +151,7 @@ namespace FindAllPaths
         // vertices in current path.  
         // localPathList<> stores actual  
         // vertices in the current path  
-        private void printAllPathsUtil(string u, string d, Dictionary<string, bool> isVisited, List<BusStopModel> localpathList)
+        private void printAllPathsUtil(string u, string d, Dictionary<string, bool> isVisited, List<BusStopModel> localpathList, double ditance)
         {
             //localpathList_Ok Luu danh sach cac canh da di qua, chua co Đỉnh cuối cùng.
             var listRouteDId = localpathList.Where(x => !string.IsNullOrEmpty(x.RouteId)).Select(x => x.RouteId).Distinct();
@@ -163,6 +167,7 @@ namespace FindAllPaths
                     BusStopModel bstopstopdination = new BusStopModel()
                     {
                         BusStopId = busstoplast.NextBusStopId,
+                        SumDistance = busstoplast.SumDistance
                     };
 
                     localpathList.Add(bstopstopdination);//add đỉnh đích vào list đường đi
@@ -198,15 +203,19 @@ namespace FindAllPaths
                                     IsOutWard = i.IsOutWard,
                                     RouteId = i.RouteId,
                                     DecodeString = i.DecodeString,
-                                    Distance = i.Distance
+                                    Distance = i.Distance,
+                                    SumDistance = i.Distance
                                 };
 
-                                localpathList.Add(bstopstopNext);
+                                if (bstopstopNext.SumDistance < (ditance * 2)) //kiểm tra khoảng cách đường bus đã đi < khoảng cách chim bay*2
+                                {
+                                    localpathList.Add(bstopstopNext);// KẾT NỘP đỉnh(cạnh) mới vào đường đi
 
-                                printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList);
+                                    printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList, ditance);
 
-                                // remove current node  
-                                localpathList.RemoveAt(localpathList.Count() - 1);
+                                    // remove current node  
+                                    localpathList.RemoveAt(localpathList.Count() - 1);
+                                }
                             }
                             else
                             {
@@ -222,22 +231,28 @@ namespace FindAllPaths
                                             IsOutWard = i.IsOutWard,
                                             RouteId = i.RouteId,
                                             DecodeString = i.DecodeString,
-                                            Distance = i.Distance
+                                            Distance = i.Distance,
+                                            SumDistance = localpathList.ElementAt(localpathList.Count() - 1).SumDistance + i.Distance
                                         };
 
-                                        localpathList.Add(bstopstopNext);
+                                        if (bstopstopNext.SumDistance < (ditance * 2)) //kiểm tra khoảng cách đường bus đã đi < khoảng cách chim bay*2
+                                        {
+                                            localpathList.Add(bstopstopNext);// KẾT NỘP đỉnh(cạnh) mới vào đường đi
 
-                                        printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList);
+                                            printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList, ditance);
 
-                                        // remove current node  
-                                        localpathList.RemoveAt(localpathList.Count() - 1);
+                                            // remove current node  
+                                            localpathList.RemoveAt(localpathList.Count() - 1);
+                                        }
                                     }
                                 }
                                 else//đi cùng tuyến
                                 {
                                     //-ui get route
                                     //Kiểm tra đi cùng tuyến thì ko được đổi chiều đi?
-                                    if (localpathList.Count() == 0)
+                                    //Đang cùng tuyến: get chiều của cạnh cuối cùng, so sánh với chiều của cạnh chuẩn bị thêm vào:
+                                    //Nếu cùng chiều thì thêm vào ok
+                                    if (localpathList.ElementAt(localpathList.Count() - 1).IsOutWard == i.IsOutWard) //Điều kiện 2: Nếu cạnh sẽ đi CÙNG chiều với CHIỀU cạnh trước đó
                                     {
                                         // add đỉnh đi qua
                                         BusStopModel bstopstopNext = new BusStopModel()
@@ -247,44 +262,22 @@ namespace FindAllPaths
                                             IsOutWard = i.IsOutWard,
                                             RouteId = i.RouteId,
                                             DecodeString = i.DecodeString,
-                                            Distance = i.Distance
+                                            Distance = i.Distance,
+                                            SumDistance = localpathList.ElementAt(localpathList.Count() - 1).SumDistance + i.Distance
                                         };
 
-                                        localpathList.Add(bstopstopNext);
-
-                                        printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList);
-
-                                        // remove current node  
-                                        localpathList.RemoveAt(localpathList.Count() - 1);
-                                    }
-                                    else
-                                    {
-                                        //Đang cùng tuyến: get chiều của cạnh cuối cùng, so sánh với chiều của cạnh chuẩn bị thêm vào:
-                                        //Nếu cùng chiều thì thêm vào ok
-                                        if (localpathList.ElementAt(localpathList.Count() - 1).IsOutWard == i.IsOutWard) //Điều kiện 2: Nếu cạnh sẽ đi CÙNG chiều với CHIỀU cạnh trước đó
+                                        if (bstopstopNext.SumDistance < (ditance * 2)) //kiểm tra khoảng cách đường bus đã đi < khoảng cách chim bay*2
                                         {
-                                            // add đỉnh đi qua
-                                            BusStopModel bstopstopNext = new BusStopModel()
-                                            {
-                                                BusStopId = i.BusStopId,
-                                                NextBusStopId = i.NextBusStopId,
-                                                IsOutWard = i.IsOutWard,
-                                                RouteId = i.RouteId,
-                                                DecodeString = i.DecodeString,
-                                                Distance = i.Distance
-                                            };
+                                            localpathList.Add(bstopstopNext);// KẾT NỘP đỉnh(cạnh) mới vào đường đi
 
-                                            localpathList.Add(bstopstopNext);
-
-                                            printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList);
+                                            printAllPathsUtil(i.NextBusStopId, d, isVisited, localpathList, ditance);
 
                                             // remove current node  
                                             localpathList.RemoveAt(localpathList.Count() - 1);
                                         }
-                                        //Nếu KHÁC chiều thì dừng
                                     }
+                                    //Nếu KHÁC chiều thì dừng
                                 }
-
                             }
                         }
                     }

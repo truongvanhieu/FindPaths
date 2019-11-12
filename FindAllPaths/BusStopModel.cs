@@ -14,6 +14,7 @@ namespace FindAllPaths
         public string RouteId { get; set; }
         public string DecodeString { get; set; }
         public double Distance { get; set; }
+        public double SumDistance { get; set; }
     }
 
     public class SaveRouteData
