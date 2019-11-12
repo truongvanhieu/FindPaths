@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BusStopModel.cs" />
+    <Compile Include="CaseRouteResultByRadius.cs" />
     <Compile Include="GetDataApi.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

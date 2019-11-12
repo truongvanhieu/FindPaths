@@ -42,6 +42,20 @@ namespace FindAllPaths
             initListVertices();
             // initialise adjacency list  
             initAdjacencyList();
+
+            List<CaseRouteResultByRadius> lstcaseradius = new List<CaseRouteResultByRadius>();
+            List<string> lstbusstopremove = new List<string>();
+
+            double LatOrigin = 16.074353;
+            double LngOrigin = 108.219798;
+
+            double LatDestination = 16.044577;
+            double LngDestination = 108.214112;
+
+            //int[] lstRadius = { 500, 1000, 2000 };
+            List<string> lstbusstoprogin = new List<string>();
+            List<string> lstbusstopdestination = new List<string>();
+            var r = 1000;
             foreach (var item in listVertices)
             {
                 var lstbusstopnext = lstfindata.FindAll(x => x.BusStopId == item);
@@ -57,20 +71,35 @@ namespace FindAllPaths
                         DecodeString = busstopnext.DecodeString,
                         Distance = busstopnext.Distance
                     };
+
                     addEdge(item, bstopnextdata);
+                }
+
+                var distanceorgin = Distance(LatOrigin, LngOrigin, lstbusstopnext.ElementAt(0).Lat, lstbusstopnext.ElementAt(0).Lng);
+                if (distanceorgin < r)
+                {
+                    lstbusstoprogin.Add(lstbusstopnext.ElementAt(0).BusStopId);
+                }
+
+                var distancedestination = Distance(LatDestination, LngDestination, lstbusstopnext.ElementAt(0).Lat, lstbusstopnext.ElementAt(0).Lng);
+                if (distancedestination < r)
+                {
+                    lstbusstopdestination.Add(lstbusstopnext.ElementAt(0).BusStopId);
                 }
             }
 
-            //------------------------------------------------------
-            // arbitrary source  
-            string s = "2f41a813-94ad-4f3e-b557-88cbe1768c40";//BusStop ID Origin
 
-            // arbitrary destination  
-            string d = "16dbe27c-8baa-48e8-908a-569469ae8319";//BusStop ID Destination
+            ////------------------------------------------------------
 
             DateTime t = DateTime.Now;
-            Console.WriteLine("Following are all different" + " paths from " + s + " to " + d);
-            printAllPaths(s, d);
+
+            foreach (var origin in lstbusstoprogin)
+            {
+                foreach (var destination in lstbusstopdestination)
+                {
+                    printAllPaths(origin, destination);
+                }
+            }
 
             var now = (DateTime.Now - t).TotalMilliseconds;
         }
@@ -137,15 +166,6 @@ namespace FindAllPaths
                     };
 
                     localpathList.Add(bstopstopdination);//add đỉnh đích vào list đường đi
-                    ////Console.Write("Tong tuyen: ");
-                    ////Console.WriteLine(string.Join("-->", listRouteDId));
-                    ////Console.Write("\n");
-                    ////Console.Write("DS Tram: ");
-                    ////Console.WriteLine(string.Join("-->", localpathList.Select(x => x.BusStopId)));
-                    ////Console.Write("\n");
-                    ////Console.Write("Tong BsStop: ");
-                    ////Console.WriteLine(localpathList.Count());
-                    ////Console.WriteLine("-------------------------------- \n");
 
                     var lstreuslt = new List<BusStopModel>(localpathList);//lưu trữ cách đi
                     lstcasefindresult.Add(lstreuslt);
@@ -296,7 +316,23 @@ namespace FindAllPaths
             }
         }
 
+        private double Distance(double lat1, double lng1, double lat2, double lng2)
+        {
+            var r = 6378137; // Earth’s mean radius in meter
+            var dlat = Rad(lat2 - lat1);
+            var dlong = Rad(lng2 - lng1);
+            var a = (Math.Sin(dlat / 2) * Math.Sin(dlat / 2)) +
+                (Math.Cos(Rad(lat1)) * Math.Cos(Rad(lat2)) *
+                Math.Sin(dlong / 2) * Math.Sin(dlong / 2));
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            var d = r * c;
+            return d;
+        }
 
+        public double Rad(double x)
+        {
+            return x * Math.PI / 180;
+        }
     }
 
     public class ClassMain
